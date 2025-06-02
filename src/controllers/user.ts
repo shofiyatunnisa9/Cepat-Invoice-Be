@@ -3,7 +3,7 @@ import { inputProfile, postProfile } from "../services/user";
 
 export async function postProfileController(req: Request, res: Response, next: NextFunction){
   try{
-    const publicurl = (req as any).publicUrl
+    const publicurl = (req as any).publicurl
     const payload =  (req as any).payload
 
     const profile = await postProfile(publicurl, payload.id, req.body)

@@ -6,13 +6,13 @@ export interface inputProfile{
   phone: string
 }
 
-export async function postProfile(publicUrl: string, userId: string,data:inputProfile) {
+export async function postProfile(publicurl: string, userId: string,data:inputProfile) {
   const profile = await prisma.profile.create({
     data:{
       company:data.company,
       address: data.address,
       phone: data.phone,
-      image: publicUrl,
+      image: publicurl,
       user:{
         connect: {id: userId}
       }

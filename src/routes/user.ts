@@ -8,6 +8,6 @@ import { postProfileController } from "../controllers/user";
 
 const router = Router()
 
-router.post("/profile", authentication, upload.single("ProfileImage"), uploadSupabase, postProfileController)
+router.post("/profile", authentication, upload.single("image"), uploadSupabase, postProfileController)
 
 export default router

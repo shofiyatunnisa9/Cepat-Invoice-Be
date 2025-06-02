@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from "express";
 import Joi from "joi";
-import { PrismaClientKnownRequestError } from "../../generated/prisma/runtime/library";
+import { PrismaClientKnownRequestError, PrismaClientValidationError } from "../../generated/prisma/runtime/library";
 
 export function errorHandler(
   err: Error,
@@ -10,8 +10,7 @@ export function errorHandler(
 ){
   if( err instanceof Joi.ValidationError){
     if (err.details[0].type == "string.email")
-    res
-      .status(400)
+    res.status(400)
       .json({ message: "Invalid Email"})
     return 
   }
@@ -34,6 +33,10 @@ export function errorHandler(
     return
   }
 
+  if(err instanceof PrismaClientValidationError){
+    res.status(400).json({message: err.message})
+  }
+  
   res.status(500).json({
     name : err.name,
     message: err.message
