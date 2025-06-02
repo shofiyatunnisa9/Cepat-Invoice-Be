@@ -1,0 +1,41 @@
+import { NextFunction, Response, Request } from "express";
+import Joi from "joi";
+import { PrismaClientKnownRequestError } from "../../generated/prisma/runtime/library";
+
+export function errorHandler(
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+){
+  if( err instanceof Joi.ValidationError){
+    if (err.details[0].type == "string.email")
+    res
+      .status(400)
+      .json({ message: "Invalid Email"})
+    return 
+  }
+
+  if(err instanceof PrismaClientKnownRequestError){
+    const { code } = err
+    switch(code){
+      case "P2002":
+        res.status(400).json({
+          message: "Email is already registered."
+        })
+      break
+      case "P2014":
+        res.status(400).json({
+          message: "User already has a profile"
+        })
+      break
+    }
+    res.status(400).json({ code })
+    return
+  }
+
+  res.status(500).json({
+    name : err.name,
+    message: err.message
+  })
+}
