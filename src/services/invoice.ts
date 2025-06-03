@@ -15,9 +15,8 @@ interface invoice{
   address: string
   phone: string
   item: Item[]
-  originalPrice: number
+  subTotal: number
   discount: number
-  discountedPrice: number
   total: number
 }
 
@@ -42,18 +41,16 @@ export async function postInvoice(pdfPublicUrl:string, profileId:number, input:i
       item: {
         create: input.item.map( i => ({
           product:i.product,
-          price: i.price,
-          quantity: i.qty,
-          total: i.total
+          price: Number(i.price),
+          quantity: Number(i.qty),
+          total: Number(i.total)
         }))
       },
-      originalPrice: input.originalPrice,
-      discount: input.discount,
-      discountedPrice: input.discountedPrice,
-      total: input.total,
+      subTotal: Number(input.subTotal),
+      discount: Number(input.discount),
+      total: Number(input.total),
       pdfUrl: pdfPublicUrl,
       profileId: profileId
-
     }
   })
   return invoice

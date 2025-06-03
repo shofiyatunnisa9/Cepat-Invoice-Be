@@ -28,21 +28,20 @@ model Profile {
 }
 
 model Invoice {
-  id              Int      @id @default(autoincrement())
-  noInvoice       String   @unique
-  date            DateTime 
-  company         String
-  address         String
-  phone           String
-  item            Item[]
-  originalPrice   Int
-  discount        Int
-  discountedPrice Int
-  total           Int
-  pdfUrl          String
-  profileId       Int
+  id                Int      @id @default(autoincrement())
+  noInvoice         String   @unique
+  date              DateTime 
+  company           String
+  address           String
+  phone             String
+  item              Item[]
+  subTotal          Int
+  discount          Int
+  total             Int
+  pdfUrl            String
+  profileId         Int
   
-  profile   Profile  @relation(fields: [profileId], references: [id])
+  profile           Profile  @relation(fields: [profileId], references: [id])
 }
 
 model Item {

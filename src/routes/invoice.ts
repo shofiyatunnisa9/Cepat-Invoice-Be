@@ -6,6 +6,6 @@ import { supaUploads } from "../middlewares/supabaseUpload";
 
 const router = Router()
 
-router.post('/invoice', authentication, supaUploads('image'), invoiceContoller)
+router.post('/invoice', authentication, supaUploads('invoice'), invoiceContoller)
 
 export default router
