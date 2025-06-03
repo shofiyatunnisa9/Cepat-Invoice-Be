@@ -1,12 +1,11 @@
-import { Request, Response, NextFunction, Router } from "express";
-import { upload } from "../middlewares/multer";
-import { uploadSupabase } from "../middlewares/uploadSupabase";
-import { authentication } from "../middlewares/auth";
+import { Router } from "express";
 import { invoiceContoller } from "../controllers/invoice";
+import { authentication } from "../middlewares/auth";
+import { supaUploads } from "../middlewares/supabaseUpload";
 
 
 const router = Router()
 
-router.post('/invoice', authentication, upload.single("invoice"), uploadSupabase, invoiceContoller)
+router.post('/invoice', authentication, supaUploads('image'), invoiceContoller)
 
 export default router

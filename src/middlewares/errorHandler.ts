@@ -1,6 +1,6 @@
 import { NextFunction, Response, Request } from "express";
 import Joi from "joi";
-import { PrismaClientKnownRequestError, PrismaClientValidationError } from "../../generated/prisma/runtime/library";
+import { PrismaClientInitializationError, PrismaClientKnownRequestError, PrismaClientValidationError } from "../../generated/prisma/runtime/library";
 
 export function errorHandler(
   err: Error,
@@ -31,6 +31,11 @@ export function errorHandler(
     }
     res.status(400).json({ code })
     return
+  }
+
+  if(err instanceof PrismaClientInitializationError){
+    const {errorCode} = err
+    res.status(400).json({code: errorCode, name: err.name, message: err.message })
   }
 
   if(err instanceof PrismaClientValidationError){
