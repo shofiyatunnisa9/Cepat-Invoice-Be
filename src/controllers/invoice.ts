@@ -1,13 +1,16 @@
 import { Request, Response, NextFunction } from "express";
 import { getProfile, postInvoice } from "../services/invoice";
 import { supabase } from "../configs/supabaseClient";
+import { invoiceSchema } from "../validation/invoice";
 
 
 export async function invoiceContoller(req: Request, res: Response, next: NextFunction){ 
 
-  req.body.publicUrlImage = (req as any).publicurl
+  req.body.publicUrlPdf = (req as any).publicUrl
 
-  const filepath = (req as any).filepath
+  console.log(req.body.publicUrlPdf);
+  
+  const filepath = (req as any).filePath
   const {id} = (req as any).payload
 
   const now = new Date()
@@ -21,10 +24,11 @@ export async function invoiceContoller(req: Request, res: Response, next: NextFu
     const profileId = await getProfile(id)
     req.body.profileId = profileId
 
+    await invoiceSchema.validateAsync(req.body)
 
     const invoice = await postInvoice(req.body)
 
-    res.status(200).json(req.body)
+    res.status(200).json(invoice)
 
   } catch(err){
     await supabase.storage.from('cepatinvoice').remove([filepath])

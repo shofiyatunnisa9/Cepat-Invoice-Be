@@ -52,7 +52,9 @@ export const invoiceSchema = Joi.object({
         'any.required': 'Total field is required'
       })
     })
-  ).min(1).required(),
+  ).min(1).required().messages({
+    
+  }),
   subTotal: Joi.number().required().messages({
     'number.base': 'Invalid type: expected a number',
     'number.empty': 'SubTotal field cannot be empty.',

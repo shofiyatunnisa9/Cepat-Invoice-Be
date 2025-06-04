@@ -4,7 +4,7 @@ import { supabase } from "../configs/supabaseClient";
 import { profileSchema } from "../validation/profile";
 
 export async function postProfileController(req: Request, res: Response, next: NextFunction){
-  req.body.publicUrlImage= (req as any).publicUrl
+  req.body.publicUrlImage = (req as any).publicUrl
   req.body.userId = (req as any).payload.id
   const filepath = (req as any).filePath
   

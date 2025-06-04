@@ -9,9 +9,9 @@ export function errorHandler(
   next: NextFunction
 ){
   if( err instanceof Joi.ValidationError){
-    if (err.details[0].type == "string.email")
+    
     res.status(400)
-      .json({ message: "Invalid Email"})
+      .json({ message: err.message})
     return 
   }
 
