@@ -9,47 +9,45 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  profile   Profile?
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  Profile  Profile?
 }
 
 model Profile {
-  id        Int       @id @default(autoincrement())
-  company   String
-  address   String
-  phone     String
-  image     String
-  Userid    String    @unique
-  invoice   Invoice[]
-
-  user      User      @relation(fields: [Userid], references: [id])
+  id      Int       @id @default(autoincrement())
+  company String
+  address String
+  phone   String
+  image   String
+  userId  String    @unique
+  invoice Invoice[]
+  User    User      @relation(fields: [userId], references: [id])
 }
 
 model Invoice {
-  id                Int      @id @default(autoincrement())
-  noInvoice         String   @unique
-  date              DateTime 
-  company           String
-  address           String
-  phone             String
-  item              Item[]
-  subTotal          Int
-  discount          Int
-  total             Int
-  pdfUrl            String
-  profileId         Int
-  
-  profile           Profile  @relation(fields: [profileId], references: [id])
+  id        Int      @id @default(autoincrement())
+  noInvoice String   @unique
+  date      DateTime
+  company   String
+  address   String
+  phone     String
+  pdfUrl    String
+  profileId Int
+  discount  Int
+  total     Int
+  subTotal  Int
+  profile   Profile  @relation(fields: [profileId], references: [id])
+  item      Item[]
 }
 
 model Item {
   id        Int     @id @default(autoincrement())
   invoiceId String
   product   String
-  price     Int
   quantity  Int
   total     Int
+  price     Int
   invoice   Invoice @relation(fields: [invoiceId], references: [noInvoice])
 }

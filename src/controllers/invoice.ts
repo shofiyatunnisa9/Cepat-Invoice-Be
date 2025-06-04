@@ -5,24 +5,26 @@ import { supabase } from "../configs/supabaseClient";
 
 export async function invoiceContoller(req: Request, res: Response, next: NextFunction){ 
 
-  const publicurl = (req as any).publicurl
+  req.body.publicUrlImage = (req as any).publicurl
+
   const filepath = (req as any).filepath
-  const payload = (req as any).payload
+  const {id} = (req as any).payload
+
   const now = new Date()
-  const body = req.body
+  if(!req.body.noInvoice){
+    const unique = String(Math.floor(Math.random() * 1000)).padStart(3, "0")
+    const date = now.toISOString().slice(0, 10).replace(/-/g, "")
+    req.body.noInvoice = `INV-gen-${date}-${unique}`
+  }
+
   try{
-    
-    const profileId = await getProfile(payload.id)
-    if(!req.body.noInvoice){
-      const unique = String(Math.floor(Math.random() * 1000)).padStart(3, "0")
-      const date = now.toISOString().slice(0, 10).replace(/-/g, "")
-
-      req.body.noInvoice = `INV-gen-${date}-${unique}`
-    }
+    const profileId = await getProfile(id)
+    req.body.profileId = profileId
 
 
-    const invoice = await postInvoice(publicurl, profileId, req.body)
-    res.status(200).json({invoice})
+    const invoice = await postInvoice(req.body)
+
+    res.status(200).json(req.body)
 
   } catch(err){
     await supabase.storage.from('cepatinvoice').remove([filepath])

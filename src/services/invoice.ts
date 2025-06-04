@@ -1,56 +1,37 @@
 import { create } from "domain";
 import { prisma } from "../configs/prismaClient";
-
-interface Item {
-  product: string
-  price: number
-  qty: number
-  total: number
-}
-
-interface invoice{
-  noInvoice: string
-  date: string
-  company: string
-  address: string
-  phone: string
-  item: Item[]
-  subTotal: number
-  discount: number
-  total: number
-}
+import { invoiceSchema } from "../validation/types";
 
 export async function getProfile(userId: string){
-
     const profile = await prisma.profile.findUnique({
-      where: {Userid: userId}
+      where: { userId }
     })
     if (!profile) throw new Error ("Your profile is not registered yet")
 
     return profile.id
 }
 
-export async function postInvoice(pdfPublicUrl:string, profileId:number, input:invoice) {
+export async function postInvoice(data: invoiceSchema) {
   const invoice = await prisma.invoice.create({
     data: {
-      noInvoice: input.noInvoice,
-      date:input.date,
-      company:input.company,
-      address: input.address,
-      phone: input.phone,
+      noInvoice: data.noInvoice,
+      date:data.date,
+      company:data.company,
+      address: data.address,
+      phone: data.phoneNumber,
       item: {
-        create: input.item.map( i => ({
+        create: data.item.map( i => ({
           product:i.product,
           price: Number(i.price),
-          quantity: Number(i.qty),
+          quantity: Number(i.quantity),
           total: Number(i.total)
         }))
       },
-      subTotal: Number(input.subTotal),
-      discount: Number(input.discount),
-      total: Number(input.total),
-      pdfUrl: pdfPublicUrl,
-      profileId: profileId
+      subTotal: Number(data.subTotal),
+      discount: Number(data.discount),
+      total: Number(data.total),
+      pdfUrl: data.publicUrlPdf,
+      profileId: Number(data.profileId)
     }
   })
   return invoice

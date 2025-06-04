@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { authSchema } from "../utils/validation/auth";
+import { authSchema } from "../validation/auth";
 import { loginService, registerService } from "../services/auth";
 
 export async function loginController(req: Request, res: Response, next: NextFunction){

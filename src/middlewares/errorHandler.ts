@@ -19,18 +19,29 @@ export function errorHandler(
     const { code } = err
     switch(code){
       case "P2002":
-        res.status(400).json({
-          message: "Email is already registered."
-        })
-      break
-      case "P2014":
-        res.status(400).json({
-          message: "User already has a profile"
-        })
-      break
+        const field = Array.isArray(err.meta?.target) ? err.meta.target[0] : err.meta?.target;
+        switch(field){
+          case "email":
+            res.status(400).json({
+              message: "Email is already registered."
+            })
+            break
+          case "userId":
+            res.status(400).json({
+              message: "User already has a profile"
+            })
+            break
+          default:
+            res.status(400).json({
+              message: `field: ${err.meta?.target}`
+            })
+            break
+        }
+        break
+      default:
+        res.status(400).json({message: err.code})
+        break
     }
-    res.status(400).json({ code })
-    return
   }
 
   if(err instanceof PrismaClientInitializationError){
@@ -43,7 +54,7 @@ export function errorHandler(
   }
   
   res.status(500).json({
-    name : err.name,
+    name: err.name,
     message: err.message
   })
 }
