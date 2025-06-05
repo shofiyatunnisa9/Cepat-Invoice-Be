@@ -25,3 +25,16 @@ export async function postProfile(data:profileSchema) {
   })
   return profile
 }
+
+export async function patchProfile(data: profileSchema){
+  const editedProfile = await prisma.profile.update({
+    where: {userId: data.userId},
+    data: {
+      company: data.company,
+      address: data.address,
+      phone: data.phoneNumber,
+      image: data.publicUrlImage
+    }
+  })
+  return editedProfile
+}

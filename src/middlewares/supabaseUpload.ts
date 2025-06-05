@@ -10,7 +10,7 @@ export const supaUploads = (fileName:string) => [
   async (req:Request, res:Response, next:NextFunction) => {
     try {
       const file = req.file
-      if (!file) return res.status(400).json({ message: 'No file uploaded' });
+      if (!file) return next();
       
       const buffer: Buffer = file.buffer
       const ext = path.extname(req.file!.originalname).toLocaleLowerCase()
@@ -30,7 +30,7 @@ export const supaUploads = (fileName:string) => [
       
       if(error) throw new Error(error.message)
 
-      const { publicUrl }= supabase.storage.from(`cepatinvoice`).getPublicUrl(filePath, {download: true}).data;
+      const { publicUrl }= supabase.storage.from(`cepatinvoice`).getPublicUrl( filePath, {download: true} ).data;
 
       (req as any).publicUrl = publicUrl;
       (req as any).filePath = filePath

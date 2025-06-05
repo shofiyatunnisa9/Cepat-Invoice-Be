@@ -1,11 +1,20 @@
 import { Router } from "express";
-import { invoiceContoller } from "../controllers/invoice";
+import {
+  getAllInvoiceController,
+  postInvoiceController,
+} from "../controllers/invoice";
 import { authentication } from "../middlewares/auth";
 import { supaUploads } from "../middlewares/supabaseUpload";
 
+const router = Router();
 
-const router = Router()
+router.get("/invoice", authentication, getAllInvoiceController);
 
-router.post('/invoice', authentication, supaUploads('invoice'), invoiceContoller)
+router.post(
+  "/invoice",
+  authentication,
+  supaUploads("invoice"),
+  postInvoiceController
+);
 
-export default router
+export default router;
