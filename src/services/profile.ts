@@ -1,7 +1,14 @@
 import { prisma } from "../configs/prismaClient";
 import { profileSchema } from "../validation/types";
 
+export async function getProfile(userId: string){
+    const profile = await prisma.profile.findUnique({
+      where: { userId }
+    })
+    if (!profile) throw new Error ("Your profile is not registered yet")
 
+    return profile
+}
 
 export async function postProfile(data:profileSchema) {
   const profile = await prisma.profile.create({

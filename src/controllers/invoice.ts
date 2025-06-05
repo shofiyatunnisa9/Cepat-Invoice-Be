@@ -1,7 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { getProfile, postInvoice } from "../services/invoice";
+import { postInvoice } from "../services/invoice";
 import { supabase } from "../configs/supabaseClient";
 import { invoiceSchema } from "../validation/invoice";
+import { getProfile } from "../services/profile";
 
 
 export async function invoiceContoller(req: Request, res: Response, next: NextFunction){ 
@@ -21,8 +22,8 @@ export async function invoiceContoller(req: Request, res: Response, next: NextFu
   }
 
   try{
-    const profileId = await getProfile(id)
-    req.body.profileId = profileId
+    const profile = await getProfile(id)
+    req.body.profileId = profile.id
 
     await invoiceSchema.validateAsync(req.body)
 

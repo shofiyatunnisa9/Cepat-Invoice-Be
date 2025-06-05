@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { postProfile } from "../services/profile";
+import { getProfile, postProfile } from "../services/profile";
 import { supabase } from "../configs/supabaseClient";
 import { profileSchema } from "../validation/profile";
 
@@ -18,4 +18,15 @@ export async function postProfileController(req: Request, res: Response, next: N
     await supabase.storage.from('cepatinvoice').remove([filepath])
     next(error)
   }
+}
+
+export async function getProfileController(req: Request, res: Response, next: NextFunction){
+  const {id} = (req as any).payload
+  try{
+    const profile = await getProfile(id)
+    res.status(200).json(profile)
+  }catch(err){
+    next(err)
+  }
+
 }

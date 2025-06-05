@@ -2,15 +2,6 @@ import { create } from "domain";
 import { prisma } from "../configs/prismaClient";
 import { invoiceSchema } from "../validation/types";
 
-export async function getProfile(userId: string){
-    const profile = await prisma.profile.findUnique({
-      where: { userId }
-    })
-    if (!profile) throw new Error ("Your profile is not registered yet")
-
-    return profile.id
-}
-
 export async function postInvoice(data: invoiceSchema) {
   const invoice = await prisma.invoice.create({
     data: {

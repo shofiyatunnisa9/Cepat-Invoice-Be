@@ -6,7 +6,7 @@ const multer = require('multer')
 const upload = multer({ storage: multer.memoryStorage() })
 
 export const supaUploads = (fileName:string) => [
-  upload.single(fileName), 
+  upload.single(fileName),
   async (req:Request, res:Response, next:NextFunction) => {
     try {
       const file = req.file
@@ -21,17 +21,16 @@ export const supaUploads = (fileName:string) => [
         filePath = `uploads/image/${fileName}`
       } else if(ext == ".pdf"){
         filePath = `uploads/pdf/${fileName}`
+      } else {
+        throw new Error("Unsupported file format")
       }
 
       const {error} = await supabase.storage.from('cepatinvoice').upload(
       filePath, buffer, {contentType: req.file!.mimetype});
       
-      if(error){
-      res.status(500).json({ message: error.message});
-      return 
-      }
+      if(error) throw new Error(error.message)
 
-      const { publicUrl }= supabase.storage.from(`cepatinvoice`).getPublicUrl(filePath).data;
+      const { publicUrl }= supabase.storage.from(`cepatinvoice`).getPublicUrl(filePath, {download: true}).data;
 
       (req as any).publicUrl = publicUrl;
       (req as any).filePath = filePath
