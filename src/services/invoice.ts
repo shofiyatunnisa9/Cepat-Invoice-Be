@@ -28,21 +28,28 @@ export async function postInvoice(data: invoiceSchema) {
   return invoice;
 }
 
-export async function getAllInvoice(userId: string, next: number) {
-  const invoice = await prisma.invoice.findMany({
-    take: 10,
-    skip: 1,
-    cursor: {
-      id: next,
-    },
-  });
-
-  return invoice;
-}
-
 export async function getInvoice(noInvoice: string) {
   const invoice = await prisma.invoice.findUnique({
     where: { noInvoice },
   });
+  return invoice;
+}
+
+export async function firstQueryInvoice() {
+  const invoice = await prisma.invoice.findMany({
+    take: 10,
+  });
+
+  return invoice;
+}
+export async function nextQueryInvoice(cursorId: number) {
+  const invoice = await prisma.invoice.findMany({
+    take: 10,
+    skip: 1,
+    cursor: {
+      id: cursorId,
+    },
+  });
+
   return invoice;
 }

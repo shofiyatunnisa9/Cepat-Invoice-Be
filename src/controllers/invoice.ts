@@ -1,13 +1,19 @@
-import { Request, Response, NextFunction } from 'express';
-import { postInvoice } from '../services/invoice';
-import { supabase } from '../configs/supabaseClient';
-import { invoiceSchema } from '../validation/invoice';
-import { getProfile } from '../services/profile';
+import { Request, Response, NextFunction } from "express";
+import {
+  firstQueryInvoice,
+  getInvoice,
+  nextQueryInvoice,
+  postInvoice,
+} from "../services/invoice";
+import { supabase } from "../configs/supabaseClient";
+import { invoiceSchema } from "../validation/invoice";
+import { getProfile } from "../services/profile";
+import { error } from "console";
 
 export async function postInvoiceController(
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) {
   req.body.publicUrlPdf = (req as any).publicUrl;
 
@@ -18,8 +24,8 @@ export async function postInvoiceController(
 
   const now = new Date();
   if (!req.body.noInvoice) {
-    const unique = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
-    const date = now.toISOString().slice(0, 10).replace(/-/g, '');
+    const unique = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
+    const date = now.toISOString().slice(0, 10).replace(/-/g, "");
     req.body.noInvoice = `INV-gen-${date}-${unique}`;
   }
 
@@ -33,13 +39,44 @@ export async function postInvoiceController(
 
     res.status(200).json(invoice);
   } catch (err) {
-    await supabase.storage.from('cepatinvoice').remove([filepath]);
+    await supabase.storage.from("cepatinvoice").remove([filepath]);
     next(err);
   }
+}
+
+export async function getInvoiceController(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { noInvoice } = req.params;
+  try {
+    const invoice = await getInvoice(noInvoice);
+
+    res.status(200).json(invoice);
+  } catch (error) {}
+  next(error);
 }
 
 export async function getAllInvoiceController(
   req: Request,
   res: Response,
-  next: NextFunction,
-) {}
+  next: NextFunction
+) {
+  try {
+    const cursor = Number(req.params);
+    if (!cursor) {
+      const invoices = await firstQueryInvoice();
+      const nextCursor = invoices[invoices.length - 1];
+
+      res.status(200).json({ invoices, next: nextCursor.id });
+      return;
+    }
+    const invoices = await nextQueryInvoice(cursor);
+    const nextCursor = invoices[invoices.length - 1].id;
+
+    res.status(200).json({ invoices, next: nextCursor });
+  } catch (error) {
+    next(error);
+  }
+}
