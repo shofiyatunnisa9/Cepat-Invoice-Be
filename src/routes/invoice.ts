@@ -11,7 +11,7 @@ const router = Router();
 
 router.get("/invoice/:noInvoice", authentication, getInvoiceController);
 
-router.get("/invoice", authentication, getAllInvoiceController);
+router.get("/invoices", authentication, getAllInvoiceController);
 
 router.post(
   "/invoice",

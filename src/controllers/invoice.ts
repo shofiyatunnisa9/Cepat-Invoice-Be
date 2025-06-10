@@ -63,19 +63,18 @@ export async function getAllInvoiceController(
   res: Response,
   next: NextFunction
 ) {
+  const { cursor } = req.query;
   try {
-    const cursor = Number(req.params);
-    if (!cursor) {
-      const invoices = await firstQueryInvoice();
-      const nextCursor = invoices[invoices.length - 1];
-
-      res.status(200).json({ invoices, next: nextCursor.id });
-      return;
+    let invoice;
+    if (cursor) {
+      invoice = await firstQueryInvoice();
+    } else {
+      invoice = await nextQueryInvoice(Number(cursor));
     }
-    const invoices = await nextQueryInvoice(cursor);
-    const nextCursor = invoices[invoices.length - 1].id;
 
-    res.status(200).json({ invoices, next: nextCursor });
+    const next = invoice[invoice.length - 1].id;
+    const prev = invoice[0].id;
+    res.status(200).json({ invoice, nextCursor: next, prevCursor: prev });
   } catch (error) {
     next(error);
   }

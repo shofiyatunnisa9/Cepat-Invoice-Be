@@ -11,12 +11,14 @@ import { patchProfile } from "../services/profile";
 const router = Router();
 
 router.get("/profile", authentication, getProfileController);
+
 router.post(
   "/profile",
   authentication,
   supaUploads("image"),
   postProfileController
 );
+
 router.patch(
   "/profile",
   authentication,
