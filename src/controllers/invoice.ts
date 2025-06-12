@@ -1,14 +1,17 @@
 import { Request, Response, NextFunction } from "express";
 import {
+  firstInvoice,
   firstQueryInvoice,
   getInvoice,
   nextQueryInvoice,
   postInvoice,
+  prevQueryInvoice,
 } from "../services/invoice";
 import { supabase } from "../configs/supabaseClient";
 import { invoiceSchema } from "../validation/invoice";
 import { getProfile } from "../services/profile";
 import { error } from "console";
+import { Invoice } from "../../generated/prisma";
 
 export async function postInvoiceController(
   req: Request,
@@ -63,18 +66,51 @@ export async function getAllInvoiceController(
   res: Response,
   next: NextFunction
 ) {
-  const { cursor } = req.query;
+  const { direction, cursor } = req.query;
+  let invoice: Invoice[] = [];
+  let hasNext = false;
+  let hasPrev = false;
+  let nextCursor;
+  let prevCursor;
   try {
-    let invoice;
-    if (cursor) {
-      invoice = await firstQueryInvoice();
-    } else {
+    if (direction === "next") {
       invoice = await nextQueryInvoice(Number(cursor));
+      hasPrev = true;
+      if (invoice.length > 10) {
+        invoice.pop();
+        hasNext = true;
+      }
+    } else if (direction === "prev") {
+      invoice = await prevQueryInvoice(Number(cursor));
+      invoice.reverse();
+      const prevAble = await firstInvoice(invoice[0].id);
+      hasNext = true;
+
+      if (prevAble) {
+        hasPrev = true;
+      }
+    } else {
+      invoice = await firstQueryInvoice();
+      if (invoice.length > 10) {
+        invoice.pop();
+        hasNext = true;
+      }
     }
 
-    const next = invoice[invoice.length - 1].id;
-    const prev = invoice[0].id;
-    res.status(200).json({ invoice, nextCursor: next, prevCursor: prev });
+    if (hasNext && invoice.length > 0) {
+      nextCursor = {
+        direction: "next",
+        cursor: invoice[invoice.length - 1].id,
+      };
+    }
+    if (hasPrev && invoice.length > 0) {
+      prevCursor = {
+        direction: "prev",
+        cursor: invoice[0].id,
+      };
+    }
+
+    res.status(200).json({ invoice, nextCursor, prevCursor });
   } catch (error) {
     next(error);
   }

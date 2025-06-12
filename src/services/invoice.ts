@@ -1,4 +1,3 @@
-import { create } from "domain";
 import { prisma } from "../configs/prismaClient";
 import { invoiceSchema } from "../validation/types";
 
@@ -37,19 +36,39 @@ export async function getInvoice(noInvoice: string) {
 
 export async function firstQueryInvoice() {
   const invoice = await prisma.invoice.findMany({
-    take: 10,
+    take: 11,
+    orderBy: { id: "asc" },
   });
 
   return invoice;
 }
-export async function nextQueryInvoice(cursorId: number) {
+export async function nextQueryInvoice(cursor: number) {
+  const invoice = await prisma.invoice.findMany({
+    take: 11,
+    cursor: {
+      id: cursor,
+    },
+    skip: 1,
+    orderBy: { id: "asc" },
+  });
+
+  return invoice;
+}
+export async function prevQueryInvoice(cursor: number) {
   const invoice = await prisma.invoice.findMany({
     take: 10,
-    skip: 1,
-    cursor: {
-      id: cursorId,
+    cursor: { id: cursor },
+    orderBy: { id: "desc" },
+    where: {
+      id: { lt: cursor },
     },
   });
 
   return invoice;
+}
+export async function firstInvoice(firstId: number) {
+  const first = prisma.invoice.findFirst({
+    where: { id: { lt: firstId } },
+  });
+  return first;
 }
