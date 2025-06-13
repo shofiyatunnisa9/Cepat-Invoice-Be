@@ -67,30 +67,34 @@ export async function getAllInvoiceController(
   next: NextFunction
 ) {
   const { direction, cursor } = req.query;
+  const { id } = (req as any).payload;
   let invoice: Invoice[] = [];
   let hasNext = false;
   let hasPrev = false;
   let nextCursor;
   let prevCursor;
+
   try {
+    const profileId = (await getProfile(id)).id;
+
     if (direction === "next") {
-      invoice = await nextQueryInvoice(Number(cursor));
+      invoice = await nextQueryInvoice(profileId, Number(cursor));
       hasPrev = true;
       if (invoice.length > 10) {
         invoice.pop();
         hasNext = true;
       }
     } else if (direction === "prev") {
-      invoice = await prevQueryInvoice(Number(cursor));
+      invoice = await prevQueryInvoice(profileId, Number(cursor));
       invoice.reverse();
-      const prevAble = await firstInvoice(invoice[0].id);
+      const prevAble = await firstInvoice(profileId, invoice[0].id);
       hasNext = true;
 
       if (prevAble) {
         hasPrev = true;
       }
     } else {
-      invoice = await firstQueryInvoice();
+      invoice = await firstQueryInvoice(profileId);
       if (invoice.length > 10) {
         invoice.pop();
         hasNext = true;
