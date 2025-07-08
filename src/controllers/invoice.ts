@@ -1,11 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import {
-  firstInvoice,
-  firstQueryInvoice,
-  getInvoice,
-  nextQueryInvoice,
+  // firstInvoice,
+  // firstQueryInvoice,
+  // getInvoice,
+  // nextQueryInvoice,
   postInvoice,
-  prevQueryInvoice,
+  // prevQueryInvoice,
 } from "../services/invoice";
 import { supabase } from "../configs/supabaseClient";
 import { invoiceSchema } from "../validation/invoice";
@@ -18,12 +18,10 @@ export async function postInvoiceController(
   res: Response,
   next: NextFunction
 ) {
-  req.body.publicUrlPdf = (req as any).publicUrl;
-
-  console.log(req.body.publicUrlPdf);
+  req.body.publicUrlPdf = (req as any).invoicesUrl;
 
   const filepath = (req as any).filePath;
-  const { id } = (req as any).payload;
+  const { id } = (req as any).AuthUser;
 
   const now = new Date();
   if (!req.body.noInvoice) {
@@ -34,7 +32,7 @@ export async function postInvoiceController(
 
   try {
     const profile = await getProfile(id);
-    req.body.profileId = profile.id;
+    req.body.userId = profile.userId;
 
     await invoiceSchema.validateAsync(req.body);
 
@@ -47,75 +45,75 @@ export async function postInvoiceController(
   }
 }
 
-export async function getInvoiceController(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const { noInvoice } = req.params;
-  try {
-    const invoice = await getInvoice(noInvoice);
+// export async function getInvoiceController(
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) {
+//   const { noInvoice } = req.params;
+//   try {
+//     const invoice = await getInvoice(noInvoice);
 
-    res.status(200).json(invoice);
-  } catch (error) {}
-  next(error);
-}
+//     res.status(200).json(invoice);
+//   } catch (error) {}
+//   next(error);
+// }
 
-export async function getAllInvoiceController(
-  req: Request,
-  res: Response,
-  next: NextFunction
-) {
-  const { direction, cursor } = req.query;
-  const { id } = (req as any).payload;
-  let invoice: Invoice[] = [];
-  let hasNext = false;
-  let hasPrev = false;
-  let nextCursor;
-  let prevCursor;
+// export async function getAllInvoiceController(
+//   req: Request,
+//   res: Response,
+//   next: NextFunction
+// ) {
+//   const { direction, cursor } = req.query;
+//   const { id } = (req as any).AuthUser;
+//   let invoice: Invoice[] = [];
+//   let hasNext = false;
+//   let hasPrev = false;
+//   let nextCursor;
+//   let prevCursor;
 
-  try {
-    const profileId = (await getProfile(id)).id;
+//   try {
+//     const profileId = (await getProfile(id)).userId;
 
-    if (direction === "next") {
-      invoice = await nextQueryInvoice(profileId, Number(cursor));
-      hasPrev = true;
-      if (invoice.length > 10) {
-        invoice.pop();
-        hasNext = true;
-      }
-    } else if (direction === "prev") {
-      invoice = await prevQueryInvoice(profileId, Number(cursor));
-      invoice.reverse();
-      const prevAble = await firstInvoice(profileId, invoice[0].id);
-      hasNext = true;
+//     if (direction === "next") {
+//       invoice = await nextQueryInvoice(profileId, Number(cursor));
+//       hasPrev = true;
+//       if (invoice.length > 10) {
+//         invoice.pop();
+//         hasNext = true;
+//       }
+//     } else if (direction === "prev") {
+//       invoice = await prevQueryInvoice(profileId, Number(cursor));
+//       invoice.reverse();
+//       const prevAble = await firstInvoice(profileId, invoice[0].id);
+//       hasNext = true;
 
-      if (prevAble) {
-        hasPrev = true;
-      }
-    } else {
-      invoice = await firstQueryInvoice(profileId);
-      if (invoice.length > 10) {
-        invoice.pop();
-        hasNext = true;
-      }
-    }
+//       if (prevAble) {
+//         hasPrev = true;
+//       }
+//     } else {
+//       invoice = await firstQueryInvoice(profileId);
+//       if (invoice.length > 10) {
+//         invoice.pop();
+//         hasNext = true;
+//       }
+//     }
 
-    if (hasNext && invoice.length > 0) {
-      nextCursor = {
-        direction: "next",
-        cursor: invoice[invoice.length - 1].id,
-      };
-    }
-    if (hasPrev && invoice.length > 0) {
-      prevCursor = {
-        direction: "prev",
-        cursor: invoice[0].id,
-      };
-    }
+//     if (hasNext && invoice.length > 0) {
+//       nextCursor = {
+//         direction: "next",
+//         cursor: invoice[invoice.length - 1].id,
+//       };
+//     }
+//     if (hasPrev && invoice.length > 0) {
+//       prevCursor = {
+//         direction: "prev",
+//         cursor: invoice[0].id,
+//       };
+//     }
 
-    res.status(200).json({ invoice, nextCursor, prevCursor });
-  } catch (error) {
-    next(error);
-  }
-}
+//     res.status(200).json({ invoice, nextCursor, prevCursor });
+//   } catch (error) {
+//     next(error);
+//   }
+// }

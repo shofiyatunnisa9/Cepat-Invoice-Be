@@ -1,40 +1,37 @@
 import { prisma } from "../configs/prismaClient";
-import { profileSchema } from "../validation/types";
+import { editProfileSchema, profileSchema } from "../validation/types/profile";
 
-export async function getProfile(userId: string){
-    const profile = await prisma.profile.findUnique({
-      where: { userId }
-    })
-    if (!profile) throw new Error ("Your profile is not registered yet")
+export async function getProfile(userId: string) {
+  const profile = await prisma.profile.findUnique({
+    where: { userId },
+  });
+  if (!profile) throw new Error("Your profile is not registered yet");
 
-    return profile
+  return profile;
 }
 
-export async function postProfile(data:profileSchema) {
+export async function postProfile(data: profileSchema) {
   const profile = await prisma.profile.create({
-    data:{
+    data: {
       company: data.company,
       address: data.address,
       phone: data.phoneNumber,
       image: data.publicUrlImage,
       userId: data.userId,
-      // user:{
-      //   connect: {id: userId}
-      // }
-    }
-  })
-  return profile
+    },
+  });
+  return profile;
 }
 
-export async function patchProfile(data: profileSchema){
+export async function patchProfile(data: editProfileSchema) {
   const editedProfile = await prisma.profile.update({
-    where: {userId: data.userId},
+    where: { userId: data.userId },
     data: {
       company: data.company,
       address: data.address,
       phone: data.phoneNumber,
-      image: data.publicUrlImage
-    }
-  })
-  return editedProfile
+      image: data.publicUrlImage,
+    },
+  });
+  return editedProfile;
 }

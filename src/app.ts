@@ -15,8 +15,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 app.use("/api/v1", authRouter);
-// app.use('/api/v1', userRouter)
-// app.use('/api/v1', invoiceRouter)
+app.use("/api/v1", userRouter);
+app.use("/api/v1", invoiceRouter);
 
 app.use(errorHandler);
 

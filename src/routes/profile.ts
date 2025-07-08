@@ -5,8 +5,7 @@ import {
   patchProfileController,
   postProfileController,
 } from "../controllers/profile";
-import { supaUploads } from "../middlewares/supabaseUpload";
-import { patchProfile } from "../services/profile";
+import { uploadField } from "../middlewares/supabaseUpload";
 
 const router = Router();
 
@@ -15,14 +14,14 @@ router.get("/profile", authentication, getProfileController);
 router.post(
   "/profile",
   authentication,
-  supaUploads("image"),
+  uploadField(["logos"]),
   postProfileController
 );
 
 router.patch(
   "/profile",
   authentication,
-  supaUploads("image"),
+  uploadField(["logos"]),
   patchProfileController
 );
 

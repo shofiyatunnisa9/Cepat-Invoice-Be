@@ -16,7 +16,7 @@ export interface invoiceSchema {
   }[];
   noInvoice: string;
   phoneNumber: string;
-  profileId: number;
+  userId: string;
   publicUrlPdf: string;
   subTotal: number;
   total: number;

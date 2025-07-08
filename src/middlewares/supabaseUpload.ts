@@ -1,46 +1,58 @@
 import { NextFunction, Request, Response } from "express";
+import multer from "multer";
 import { supabase } from "../configs/supabaseClient";
-import path from "path";
-const multer = require("multer");
 
-const upload = multer({ storage: multer.memoryStorage() });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 500 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const isImage = file.mimetype.startsWith("image/");
+    const isPdf = file.mimetype === "application/pdf";
+    if (!isImage && !isPdf) {
+      return cb(new Error("Only image or PDF files are allowed"));
+    }
+    cb(null, true);
+  },
+});
 
-export const supaUploads = (fileName: string) => [
-  upload.single(fileName),
+export const uploadField = (fieldNames: string[]) => [
+  upload.fields(fieldNames.map((name) => ({ name, maxCount: 1 }))),
+
   async (req: Request, res: Response, next: NextFunction) => {
+    const userId = (req as any).AuthUser.id;
+    const files = req.files as Record<string, Express.Multer.File[]>;
+
     try {
-      const file = req.file;
-      if (!file) return next();
+      for (const fieldName of fieldNames) {
+        const file = files?.[fieldName]?.[0];
+        if (!file) continue;
 
-      const buffer: Buffer = file.buffer;
-      const ext = path.extname(req.file!.originalname).toLocaleLowerCase();
-      const fileName = `${Date.now()}_${file.originalname}`;
-      let filePath = "";
+        let extension = "file";
 
-      if ([".jpg", ".jpeg", ".png"].includes(ext)) {
-        filePath = `uploads/image/${fileName}`;
-      } else if (ext == ".pdf") {
-        filePath = `uploads/pdf/${fileName}`;
-      } else {
-        throw new Error("Unsupported file format");
+        if (file.mimetype.startsWith("image/")) {
+          extension = "img";
+        } else if (file.mimetype === "application/pdf") {
+          extension = "pdf";
+        }
+
+        const buffer: Buffer = file.buffer;
+        const fileName = `${Date.now()}_${extension}`;
+        const filePath = `${userId}/${fileName}`;
+
+        const { error } = await supabase.storage
+          .from(fieldName)
+          .upload(filePath, buffer, { contentType: file.mimetype });
+        if (error) throw new Error(error.message);
+
+        const { publicUrl } = supabase.storage
+          .from(fieldName)
+          .getPublicUrl(filePath).data;
+        (req as any)[`${fieldName}Url`] = publicUrl;
+        (req as any)[`${fieldName}Path`] = filePath;
       }
-
-      const { error } = await supabase.storage
-        .from("cepatinvoice")
-        .upload(filePath, buffer, { contentType: req.file!.mimetype });
-
-      if (error) throw new Error(error.message);
-
-      const { publicUrl } = supabase.storage
-        .from(`cepatinvoice`)
-        .getPublicUrl(filePath).data;
-
-      (req as any).publicUrl = publicUrl;
-      (req as any).filePath = filePath;
-
       next();
-    } catch (err) {
-      next(err);
+    } catch (error) {
+      next(error);
     }
   },
 ];

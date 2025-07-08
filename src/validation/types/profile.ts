@@ -10,3 +10,11 @@ export interface profileSchema {
   publicUrlImage: string;
   userId: string;
 }
+
+export interface editProfileSchema {
+  address?: string;
+  company?: string;
+  phoneNumber?: string;
+  publicUrlImage?: string;
+  userId: string;
+}

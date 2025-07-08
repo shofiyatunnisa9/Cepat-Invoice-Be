@@ -1,5 +1,5 @@
 import jwt from "jsonwebtoken";
-import { Role } from "../validation/types/Auth";
+import { Role } from "../../generated/prisma";
 
 const JWT_SECRET = process.env.JWT_SECRET as string;
 
