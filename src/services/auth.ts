@@ -1,34 +1,33 @@
 import { prisma } from "../configs/prismaClient";
-import { compare, hash } from "bcrypt"
+import { compare, hash } from "bcrypt";
 import { signToken, TokenPayload, verifyToken } from "../utils/jwt";
+import { Auth } from "../validation/types/Auth";
 
-interface auth{
-  email: string
-  password: string
-}
-
-export async function loginService(data : auth){
+export async function loginService(data: Auth) {
   const user = await prisma.user.findUnique({
-    where: {email: data.email}
-  })
-  if (!user) throw new Error ("Email is not registered")
+    where: { email: data.email },
+  });
+  if (!user) throw new Error("Email is not registered");
 
-  const isValid = await compare(data.password, user.password )
-  if(!isValid) throw new Error ("Wrong password")
+  const isValid = await compare(data.password, user.password);
+  if (!isValid) throw new Error("Wrong password");
 
-  const payload: TokenPayload = {id: user.id}
+  const payload: TokenPayload = { id: user.id, Role: user.role };
 
-  const token = signToken(payload)
+  const token = signToken(payload);
 
-  return token
+  return token;
 }
 
-export async function registerService(data: auth){
-  const hashPassword = await hash(data.password, 10)
+export async function registerService(data: Auth) {
+  const hashPassword = await hash(data.password, 10);
 
   const user = await prisma.user.create({
-    data: {email: data.email, password: hashPassword}
-  })
+    data: { email: data.email, password: hashPassword },
+  });
+  const payload: TokenPayload = { id: user.id, Role: user.role };
 
-  return({email: user.email})
+  const token = signToken(payload);
+
+  return { email: user.email, token };
 }

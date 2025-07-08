@@ -9,37 +9,37 @@ datasource db {
 }
 
 model User {
-  id       String   @id @default(uuid())
-  email    String   @unique
+  id       String    @id @default(uuid())
+  email    String    @unique
   password String
+  role     Role      @default(USER)
+  invoices Invoice[]
   Profile  Profile?
 }
 
 model Profile {
-  id      Int       @id @default(autoincrement())
+  userId  String @id
   company String
   address String
   phone   String
   image   String
-  userId  String    @unique
-  invoice Invoice[]
-  User    User      @relation(fields: [userId], references: [id])
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Invoice {
   id        Int      @id @default(autoincrement())
   noInvoice String   @unique
-  date      DateTime
+  date      DateTime @default(now())
   company   String
   address   String
   phone     String
-  pdfUrl    String
-  profileId Int
-  discount  Int
-  total     Int
-  subTotal  Int
-  profile   Profile  @relation(fields: [profileId], references: [id])
   item      Item[]
+  subTotal  Int
+  total     Int
+  discount  Int
+  pdfUrl    String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Item {
@@ -49,5 +49,10 @@ model Item {
   quantity  Int
   total     Int
   price     Int
-  invoice   Invoice @relation(fields: [invoiceId], references: [noInvoice])
+  invoice   Invoice @relation(fields: [invoiceId], references: [noInvoice], onDelete: Cascade)
+}
+
+enum Role {
+  ADMIN
+  USER
 }
