@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authentication } from "../middlewares/auth";
 import {
   getProfileController,
-  patchProfileController,
+  // patchProfileController,
   postProfileController,
 } from "../controllers/profile";
 import { uploadField } from "../middlewares/supabaseUpload";
@@ -18,11 +18,11 @@ router.post(
   postProfileController
 );
 
-router.patch(
-  "/profile",
-  authentication,
-  uploadField(["logos"]),
-  patchProfileController
-);
+// router.patch(
+//   "/profile",
+//   authentication,
+//   uploadField(["logos"]),
+//   patchProfileController
+// );
 
 export default router;
