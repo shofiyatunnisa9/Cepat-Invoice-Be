@@ -18,29 +18,34 @@ export async function postInvoiceController(
   res: Response,
   next: NextFunction
 ) {
-  req.body.publicUrlPdf = (req as any).invoicesUrl;
+  const publicUrlPdf = (req as any).invoicesUrl;
 
   const filepath = (req as any).filePath;
   const { id } = (req as any).AuthUser;
 
-  const now = new Date();
-  if (!req.body.noInvoice) {
-    const unique = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
-    const date = now.toISOString().slice(0, 10).replace(/-/g, "");
-    req.body.noInvoice = `INV-gen-${date}-${unique}`;
-  }
-
   try {
-    const profile = await getProfile(id);
-    req.body.userId = profile.userId;
+    const items = JSON.parse(req.body.item);
 
-    await invoiceSchema.validateAsync(req.body);
+    const payload = {
+      noInvoice: req.body.noInvoice,
+      date: new Date(`${req.body.date}T00:00:00.000Z`),
+      company: req.body.company,
+      address: req.body.address,
+      phoneNumber: req.body.phoneNumber,
+      item: items,
+      subTotal: req.body.subTotal,
+      discount: req.body.discount,
+      total: req.body.total,
+      publicUrlPdf,
+      userId: id,
+    };
+    await invoiceSchema.validateAsync(payload);
 
-    const invoice = await postInvoice(req.body);
+    const invoice = await postInvoice(payload);
 
     res.status(200).json(invoice);
   } catch (err) {
-    await supabase.storage.from("cepatinvoice").remove([filepath]);
+    await supabase.storage.from("invoices").remove([filepath]);
     next(err);
   }
 }

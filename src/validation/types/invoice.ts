@@ -6,7 +6,7 @@
 export interface invoiceSchema {
   address: string;
   company: string;
-  date: string;
+  date: Date;
   discount: number;
   item: {
     price: number;
