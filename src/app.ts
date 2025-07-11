@@ -17,6 +17,9 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1", authRouter);
 app.use("/api/v1", userRouter);
 app.use("/api/v1", invoiceRouter);
+app.get("/", (req, res) => {
+  res.send("Invoice BE ready go");
+});
 
 app.use(errorHandler);
 
